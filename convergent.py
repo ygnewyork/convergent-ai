@@ -2,7 +2,7 @@ from openai import OpenAI
 client = OpenAI(api_key="myapikey")
 
 completion = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-3.5-turbo",
     messages=[
         {"role": "system", "content": "You are a text analyzer who specializes in scrutinizing job descriptions and seeing if the answers somebody gives to potential interview questions align with the job's values. You will be given a job description, interview question, and someone giving a sample response. Your job is to evaluate how well the response answers the question and aligns with the job description. Always give constructive criticsm to the user."},
         {
