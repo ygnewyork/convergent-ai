@@ -2,6 +2,7 @@ from openai import OpenAI
 import librosa
 import numpy as np
 
+###tonality, pitch, tone analsyis
 
 audio_path = ("yash_sample.mp3")
 y, sr = librosa.load(audio_path)
@@ -52,6 +53,46 @@ transcription = client.audio.transcriptions.create(
   model="whisper-1",
   file=audio_file
 )
+
+def summarize_speech_analysis(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration):
+    summary = ""
+
+    # Analyzing pitch variation
+    if pitch_variation > 100:  # Thresholds are arbitrary; adjust based on your data
+        summary += "The speaker shows a high pitch variation, indicating a dynamic and expressive tone throughout the speech.\n"
+    elif pitch_variation > 50:
+        summary += "The speaker maintains a moderate pitch variation, suggesting a balanced but engaging tone.\n"
+    else:
+        summary += "The speaker's pitch variation is low, indicating a more monotone and steady delivery style.\n"
+
+    # Analyzing average volume
+    if average_volume > 0.1:  # Thresholds are arbitrary; adjust based on your data
+        summary += "The average volume is relatively high, reflecting a confident and assertive speaking style.\n"
+    elif average_volume > 0.05:
+        summary += "The average volume is moderate, suggesting a clear but not overly loud speaking style.\n"
+    else:
+        summary += "The average volume is low, which may indicate a softer or more subdued speaking style.\n"
+
+    # Analyzing speaking rate
+    if speaking_rate > 5:  # Thresholds are arbitrary; adjust based on your data
+        summary += "The speaking rate is fast, possibly reflecting excitement or nervousness.\n"
+    elif speaking_rate > 2:
+        summary += "The speaking rate is moderate, indicating a balanced pace that is likely easy for listeners to follow.\n"
+    else:
+        summary += "The speaking rate is slow, which could indicate careful thought but may risk losing listener engagement.\n"
+
+    # Analyzing pauses
+    if pause_count > 10 and pause_duration > 1.0:  # Thresholds are arbitrary; adjust based on your data
+        summary += "The speech contains frequent or lengthy pauses, suggesting a measured or contemplative pace.\n"
+    elif pause_count > 5:
+        summary += "The speech contains a moderate amount of pauses, adding a natural rhythm to the delivery.\n"
+    else:
+        summary += "The speech contains few pauses, which may make it sound continuous or uninterrupted.\n"
+
+    return summary
+
+print(summarize_speech_analysis(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration))
+
 
 ##gpt integration
 completion = client.chat.completions.create(
