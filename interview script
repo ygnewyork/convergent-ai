@@ -1,0 +1,4 @@
+In my previous role, I led the development of a real-time inventory management system for a large e-commerce platform. 
+The main challenge was ensuring data consistency across multiple warehouses while handling high concurrent user traffic. 
+To address this, I implemented a distributed caching system using Redis, which significantly reduced database load and improved response times.
+I also designed a message queue architecture with Apache Kafka to handle inventory updates asynchronously, ensuring data integrity during peak periods. 
