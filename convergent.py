@@ -168,3 +168,30 @@ def summarize_speech_analysis(pitch_variation, average_volume, speaking_rate, pa
 # Example usage (you would need to call this function with the actual values)
 total_duration = librosa.get_duration(y=y, sr=sr)
 print(summarize_speech_analysis(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration, total_duration))
+
+def calculate_audio_score(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration, total_duration, speech_ratio):
+    # Pitch Variation Score
+    pitch_score = 25 * (1 - min(abs(pitch_variation - 0.075) / 0.075, 1))
+    
+    # Average Volume Score
+    volume_score = 20 * (1 - min(abs(average_volume - 0.06) / 0.06, 1))
+    
+    # Speaking Rate Score
+    rate_score = 20 * (1 - min(abs(speaking_rate - 3.25) / 3.25, 1))
+    
+    # Pause Usage Score
+    pause_frequency = pause_count / (total_duration / 60)
+    pause_duration_ratio = pause_duration / total_duration
+    pause_score = 10 * (1 - min(abs(pause_frequency - 9) / 9, 1)) + 10 * (1 - min(abs(pause_duration_ratio - 0.2) / 0.2, 1))
+    
+    # Speech to Total Ratio Score
+    ratio_score = 15 * (1 - min(abs(speech_ratio - 0.8) / 0.8, 1))
+    
+    # Total Score
+    total_score = pitch_score + volume_score + rate_score + pause_score + ratio_score
+    
+    return round(total_score)
+
+# Calculate the score using the extracted metrics
+audio_score = calculate_audio_score(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration, total_duration, speech_ratio)
+print(f"Overall Audio Score: {audio_score}/100")
