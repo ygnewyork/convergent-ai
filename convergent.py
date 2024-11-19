@@ -1,3 +1,70 @@
+import requests
+from openai import OpenAI
+
+# Placeholder for your Perplexity API key
+PERPLEXITY_API_KEY = "abcde"
+
+# Initialize OpenAI client
+client = OpenAI()
+
+# Transcribe the audio using Whisper
+audio_file = open("yash_sample.mp3", "rb")
+transcription = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file
+)
+
+# Analyze the transcription using Perplexity API
+analysis_url = "https://api.perplexity.ai/chat/completions"
+analysis_headers = {
+    "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+    "Content-Type": "application/json"
+}
+
+analysis_data = {
+    "model": "llama-3.1-sonar-small-128k-online",
+    "messages": [
+        {"role": "system", "content": f"""
+        You are a text analyzer who specializes in scrutinizing job descriptions and seeing if the answers somebody gives to potential interview questions align with the job's values. 
+        You will be given a job description, interview question, and someone giving a sample response. 
+        Your job is to evaluate how well the response answers the question and aligns with the job description. 
+        If they mention a company name, look up interview questions that are typically asked and their responses for that company and give tips to how well the user's response aligns with those actions. 
+        Always give constructive criticism to the user.
+        Additionally, give a user score from 1 to 100 and tell the user how well they did and explain why they got that score.
+        """},
+        {"role": "user", "content": f"""
+        Job Description: We're not rockstars or ninjas, just regular coders trying to make it a little easier to manage a doctor's office. 
+        Working in Ruby/Rails API with AngularJS/React front-end deployed on AWS cloud infrastructure we help keep track of patient appointments, drug inventory, and integrate with systems to send appointment reminders and bill insurance claims. 
+        We hire people we can trust. As soon as you hit merge, your code is headed to production (and ringing a gong in our Austin office) and you're given a wide berth to solve problems and improve our engineering team. 
+        Come join a 20-person engineering organization spread across three smaller feature teams where you can make a direct impact.
+        Our Stack React/ES6 Front-end - Ruby on Rails API - MySQL - AWS - Docker What You'll Do Write and deploy code - Create tests - Work with product on stories - Improve our processes - Attend daily stand-ups - Stay curious and enjoy learning new things 
+        Desired Skills/Experience 4+ years Ruby, Python, Java, Javascript or other language - Strong problem-solving skills - Must be authorized to work in the United States About WeInfuse Come join our growing company. 
+        We are an established healthcare SaaS start-up with offices in Dallas and Austin. Founded in 2016, WeInfuse is an infusion center software and consulting organization.
+        Our founders and their team have developed the first and only end-to-end software solution for infusion centers that has gained significant traction in the market. 
+        In addition to providing the industry's leading SaaS solution, WeInfuse provides infusion center start-up, optimization and pharmaceutical manufacturer consulting services. 
+        Interview Question: What skills do you have that will be relevant to this position?
+        User Response: {transcription.text}
+        """}
+    ]
+}
+
+analysis_response = requests.post(analysis_url, headers=analysis_headers, json=analysis_data)
+
+# Check if the request was successful
+if analysis_response.status_code == 200:
+    analysis_data = analysis_response.json()
+    
+    # Check if 'choices' key exists in the response
+    if 'choices' in analysis_data and len(analysis_data['choices']) > 0:
+        analysis = analysis_data['choices'][0]['message']['content']
+        print(analysis)
+    else:
+        print("Error: Unexpected response structure from Perplexity API")
+        print("Response content:", analysis_data)
+else:
+    print(f"Error: API request failed with status code {analysis_response.status_code}")
+    print("Response content:", analysis_response.text)
+
 import librosa
 import numpy as np
 
@@ -165,9 +232,12 @@ def summarize_speech_analysis(pitch_variation, average_volume, speaking_rate, pa
 
     return "\n".join(summary)
 
+
+
 # Example usage (you would need to call this function with the actual values)
 total_duration = librosa.get_duration(y=y, sr=sr)
 print(summarize_speech_analysis(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration, total_duration))
+
 
 def calculate_audio_score(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration, total_duration, speech_ratio):
     # Pitch Variation Score
@@ -194,4 +264,5 @@ def calculate_audio_score(pitch_variation, average_volume, speaking_rate, pause_
 
 # Calculate the score using the extracted metrics
 audio_score = calculate_audio_score(pitch_variation, average_volume, speaking_rate, pause_count, pause_duration, total_duration, speech_ratio)
+
 print(f"Overall Audio Score: {audio_score}/100")
